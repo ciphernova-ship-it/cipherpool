@@ -8,16 +8,15 @@ function App() {
 
 
   return (
-    <div className="bg-gray-300 h-screen">
-      <Router>
-        <Header />
-        <Routes>
-          <Route path="/" element={<SwapCompnent />} />
-          <Route path="/orders" element={<Orders />} />
-        </Routes>
-      </Router>
-
-    </div>
+<div className="bg-gray-300 min-h-screen flex flex-col">
+  <Router>
+    <Header />
+    <Routes>
+      <Route path="/" element={<SwapCompnent />} />
+      <Route path="/orders" element={<Orders />} />
+    </Routes>
+  </Router>
+</div>
   )
 }
 
