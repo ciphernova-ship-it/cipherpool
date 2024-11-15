@@ -2,6 +2,7 @@ require("dotenv").config({path: "../.env"});
 const path = require("path");
 const express = require("express");
 const app = express();
+const cors = require('cors');
 
 const mongoLib = require("../lib/mongo.lib");
 const loggerLib = require('../lib/logger.lib');
@@ -12,6 +13,7 @@ const apiConfig = require("../config/api.config.json");
     try {
         await mongoLib.connect(process.env.MONGO_URL);
 
+        app.use(cors());
         app.use(express.json());
         app.use(express.urlencoded({extended: true}));
 
