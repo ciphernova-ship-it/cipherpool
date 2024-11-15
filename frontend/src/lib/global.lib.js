@@ -6,7 +6,7 @@ function setGlobalKey(key, value) {
     if (!Object.keys(globalKeysEnum).includes(key)) {
         throw new Error(`Key ${key} not found in globalKeysEnum`)
     }
-    window[key] = value
+    global[key] = value
 }
 
 function getGlobalKey(key) {
@@ -14,7 +14,7 @@ function getGlobalKey(key) {
         throw new Error(`Key ${key} not found in globalKeysEnum`)
     }
 
-    return window[key]
+    return global[key]
 }
 
 function deleteGlobalKey(key) {
@@ -22,7 +22,7 @@ function deleteGlobalKey(key) {
         throw new Error(`Key ${key} is empty`)
     }
 
-    delete window[key]
+    delete global[key]
 }
 
 export default {

@@ -3,9 +3,10 @@ import downArrow from "./../../public/assets/dowmArrow.svg";
 import ethLogo from "./../../public/assets/ethLogo.svg";
 import tetherLogo from "./../../public/assets/tether.svg";
 import { useState } from "react";
-import { TOAST_CONFIG} from "./../utils/constants"
+import { TOAST_CONFIG, BACKEND_BASE_URL} from "./../utils/constants"
 import { useAccount } from "wagmi"
 import CustomWalletButton from "./CustomWalletButton";
+import orderLib from "./../lib/order.lib"
 
 
 const SwapComponent = () => {
@@ -61,11 +62,28 @@ const SwapComponent = () => {
             maker : address
         };
 
+        const {ciphertext,dataToEncryptHash} = await orderLib.encryptOrder(orderData.sourceToken, orderData.destinationToken, orderData.quantity, orderData.quantity * orderData.price, orderData.maker)
+        
+        const response = await fetch( `${BACKEND_BASE_URL}/order/add`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sourceToken: orderData.sourceToken,
+                destToken: orderData.destinationToken,
+                maker: orderData.maker,
+                ciphertext,
+                dataToEncryptHash
+
+            })
+        })
+
 
          // store the funds in the vault
 
          // Make the API Call to create the order
-        console.log(orderData)
+        console.log(response)
 
 
         // Success
