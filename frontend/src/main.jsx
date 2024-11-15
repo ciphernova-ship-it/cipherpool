@@ -11,11 +11,9 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
 import {
-  mainnet,
-  polygon,
-  optimism,
+
   arbitrum,
-  base,
+  arbitrumSepolia,
 } from 'wagmi/chains';
 import {
   QueryClientProvider,
@@ -26,7 +24,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const config = getDefaultConfig({
   appName: 'Cipherpool',
   projectId: 'b534a3a93b66b9fccda2a2f70d875708',
-  chains: [mainnet, polygon, optimism, arbitrum, base],
+  chains: [arbitrum , arbitrumSepolia],
   ssr: true, // If your dApp uses server side rendering (SSR)
 });
 
