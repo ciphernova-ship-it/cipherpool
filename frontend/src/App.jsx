@@ -1,11 +1,22 @@
+import Header from "./components/Header"
+import Orders from "./components/Orders";
+import SwapCompnent from "./components/SwapComponent"
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 
 function App() {
 
 
   return (
-    <div className="text-red-500">
-          Hello World
+    <div className="bg-gray-300 h-screen">
+      <Router>
+        <Header />
+        <Routes>
+          <Route path="/" element={<SwapCompnent />} />
+          <Route path="/orders" element={<Orders />} />
+        </Routes>
+      </Router>
+
     </div>
   )
 }
