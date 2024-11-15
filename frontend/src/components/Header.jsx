@@ -3,12 +3,33 @@ import Logo from "./../../public/assets/Logo.svg"
 import { Link } from "react-router-dom"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import CustomWalletButton from "./CustomWalletButton"
+import { useEffect } from "react"
+import litLib from "./../lib/lit.lib"
+
 
 
 const Header = () => {
 
 
     const { isConnected } = useAccount()
+
+    const connectLibClient = async ()=>{
+        try{
+
+         await litLib.connect();
+
+        }catch(error){
+            console.log(error);
+        }
+    }
+
+    useEffect(()=> {
+
+     if(isConnected){ connectLibClient()}
+           
+    }, [isConnected])
+    
+
 
 
 
