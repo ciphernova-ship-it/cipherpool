@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CipherPool API</title>
+</head>
+<body>
+<ul>
+    <li>
+        <h2>/POST Add Order</h2>
+        <form action="http://localhost:3000/order/add" method="POST">
+            <label for="sourceToken">Source Token:</label>
+            <input type="text" id="sourceToken" name="sourceToken" required><br><br>
+
+            <label for="destinationToken">Destination Token:</label>
+            <input type="text" id="destinationToken" name="destinationToken" required><br><br>
+
+            <label for="ciphertext">Ciphertext:</label>
+            <input type="text" id="ciphertext" name="ciphertext" required><br><br>
+
+            <label for="dataToEncryptHash">dataToEncryptHash:</label>
+            <input type="text" id="dataToEncryptHash" name="dataToEncryptHash" required><br><br>
+
+            <button type="submit">Add Order</button>
+        </form>
+    </li>
+</ul>
+</body>
+</html>

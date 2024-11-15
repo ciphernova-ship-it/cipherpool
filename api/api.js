@@ -1,0 +1,29 @@
+require("dotenv").config({path: "../.env"});
+const path = require("path");
+const express = require("express");
+const app = express();
+
+const mongoLib = require("../lib/mongo.lib");
+const loggerLib = require('../lib/logger.lib');
+
+const apiConfig = require("../config/api.config.json");
+
+(async () => {
+    try {
+        await mongoLib.connect(process.env.MONGO_URL);
+
+        app.use(express.json());
+        app.use(express.urlencoded({extended: true}));
+
+        app.get("/", (req, res) => {
+            return res.sendFile(path.resolve(__dirname, "./view/index.html"));
+        });
+
+        app.listen(apiConfig.port, () => {
+            loggerLib.logInfo(`API started on port: ${apiConfig.port}`);
+        });
+    } catch (error) {
+        loggerLib.logError(error);
+        process.exit(1);
+    }
+})();
