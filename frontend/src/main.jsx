@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import '@rainbow-me/rainbowkit/styles.css';
+import { ToastContainer } from 'react-toastify';
 
 import {
   getDefaultConfig,
@@ -20,6 +21,7 @@ import {
   QueryClientProvider,
   QueryClient,
 } from "@tanstack/react-query";
+import 'react-toastify/dist/ReactToastify.css';
 
 const config = getDefaultConfig({
   appName: 'Cipherpool',
@@ -39,5 +41,6 @@ createRoot(document.getElementById('root')).render(
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
+    <ToastContainer />
   </StrictMode>,
 )
