@@ -8,6 +8,7 @@ const mongoLib = require("../lib/mongo.lib");
 const loggerLib = require('../lib/logger.lib');
 
 const apiConfig = require("../config/api.config.json");
+const orderRoutes = require("./route/order.route");
 
 (async () => {
     try {
@@ -20,6 +21,7 @@ const apiConfig = require("../config/api.config.json");
         app.get("/", (req, res) => {
             return res.sendFile(path.resolve(__dirname, "./view/index.html"));
         });
+        app.use("/order", orderRoutes);
 
         app.listen(apiConfig.port, () => {
             loggerLib.logInfo(`API started on port: ${apiConfig.port}`);

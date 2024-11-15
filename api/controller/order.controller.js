@@ -11,12 +11,7 @@ async function addOrder(req, res) {
         const {maker, sourceToken, destToken, ciphertext, dataToEncryptHash} = req.body;
         if (_.isEmpty(maker) || _.isEmpty(sourceToken) || _.isEmpty(destToken) || _.isEmpty(ciphertext) || _.isEmpty(dataToEncryptHash)) {
             return res.status(400).json({
-                message: 'Missing required fields!',
-                maker: maker,
-                sourceToken: sourceToken,
-                destToken: destToken,
-                ciphertext: ciphertext,
-                dataToEncryptHash: dataToEncryptHash
+                message: `Missing required fields! maker: ${maker}, sourceToken: ${sourceToken}, destToken: ${destToken}, ciphertext: ${ciphertext}, dataToEncryptHash: ${dataToEncryptHash}`
             });
         }
 
