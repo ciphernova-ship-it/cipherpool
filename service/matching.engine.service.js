@@ -3,7 +3,6 @@ const _ = require("lodash");
 
 const litLib = require("../lib/lit.lib");
 const mongoLib = require("../lib/mongo.lib");
-const walletLib = require("../lib/wallet.lib");
 const helperLib = require("../lib/helper.lib");
 const loggerLib = require("../lib/logger.lib");
 
@@ -25,7 +24,7 @@ const orderModel = require("../model/order.model");
         const chainWallet = litLib.getChainWallet();
         const chainProvider = litLib.getChainProvider();
 
-        let orders = [], pairOrders = [], matchingCalls = [], matchingChecks = [];
+        let orders = [], pairOrders = [];
         while (true) {
             orders = await mongoLib.findWithSelect(orderModel, {}, {__v: 0});
 
@@ -82,13 +81,27 @@ const orderModel = require("../model/order.model");
                     nonce: await chainProvider.getTransactionCount(pkp.ethAddress),
                 });
 
-                console.log(data);
-                const txReceipt=await chainProvider.sendTransaction(JSON.parse(data.response).signedTx)
-                console.log(txReceipt)
+                if (data.response === "NOT_MATCHED") {
+                    loggerLib.logInfo("Orders not matched!");
+                    continue;
+                }
+
+                const transaction = await chainProvider.sendTransaction(JSON.parse(data.response).signedTx);
+                await transaction.wait();
+
+                await Promise.all([
+                    mongoLib.deleteOne(orderModel, {_id: pairOrder.fromOrder._id}),
+                    mongoLib.deleteOne(orderModel, {_id: pairOrder.toOrder._id}),
+                ])
+                loggerLib.logInfo({
+                    message: "Order matched successfully!",
+                    fromOrder: pairOrder.fromOrder._id,
+                    toOrder: pairOrder.toOrder._id,
+                    txHash: transaction.hash,
+                })
             }
 
             await helperLib.sleep(1000);
-            process.exit(1);
         }
     } catch (error) {
         loggerLib.logError(error);

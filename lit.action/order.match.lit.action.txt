@@ -19,7 +19,7 @@
                 to: "0x32cBDB4f9ee29508eCffaa64643904A965A5DC83",
                 value:0,
                 nonce,
-                gasLimit: "0xea60",
+                gasLimit: "0x30d40",
                 gasPrice: gasPrice,
                 data: generateCallData(makerTokenAddress,makerTokenUserAddress,makerTokenAmount,takerTokenAddress,takerTokenUserAddress,takerTokenAmount),
                 type: 0,
@@ -60,10 +60,10 @@
                 chainId,
                 makerSourceTokenAddress,
                 makerSourceTokenUserAddress,
-                order1.sourceTokenAmount,
+                BigInt(order1.sourceTokenAmount*10**18),
                 takerSourceTokenAddress,
                 takerSourceTokenUserAddress,
-                order2.sourceTokenAmount
+                BigInt(order2.sourceTokenAmount*10**18)
             );
             console.log(orderSettlingTransaction);
 
