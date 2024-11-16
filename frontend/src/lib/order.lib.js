@@ -1,42 +1,58 @@
 import _ from "lodash";
 
 import litLib from './lit.lib';
+import litConfig from "../../../config/lit.config.json";
 
 function getOrderEncryptionAcc(maker) {
     try {
-        return [{
-            contractAddress: '',
-            standardContractType: '',
-            chain: "ethereum",
-            method: '',
-            parameters: [
-                ':userAddress',
-            ],
-            returnValueTest: {
-                comparator: '=',
-                value: maker
+        if(_.isEmpty(maker)) {
+            throw new Error(`Missing args! maker: ${maker}`);
+        }
+
+        return  [
+            {
+                contractAddress: '',
+                standardContractType: '',
+                chain: "ethereum",
+                method: '',
+                parameters: [
+                    ':userAddress',
+                ],
+                returnValueTest: {
+                    comparator: '=',
+                    value: maker
+                },
+            },
+            {operator: "or"},
+            {
+                contractAddress: '',
+                standardContractType: '',
+                chain: 'ethereum',
+                method: '',
+                parameters: [':currentActionIpfsId'],
+                returnValueTest: {
+                    comparator: '=',
+                    value: litConfig.orderMatchingLitActionCid,
+                },
             }
-        }]
+        ]
     } catch (error) {
         throw error;
     }
 }
 
-async function encryptOrder(sourceToken, destToken, sourceTokenAmount, destTokenAmount, maker) {
+async function encryptOrder(sourceTokenAmount, destTokenAmount, maker) {
     try {
-        if (_.isEmpty(sourceToken) || _.isEmpty(destToken) || _.isNil(sourceTokenAmount) || _.isNil(destTokenAmount) || _.isEmpty(maker)) {
-            throw new Error(`Missing args! sourceToken: ${sourceToken} destToken: ${destToken} sourceTokenAmount: ${sourceTokenAmount} destTokenAmount: ${destTokenAmount} maker: ${maker}`);
+        if (_.isNil(sourceTokenAmount) || _.isNil(destTokenAmount) || _.isEmpty(maker)) {
+            throw new Error(`Missing args! sourceTokenAmount: ${sourceTokenAmount} destTokenAmount: ${destTokenAmount} maker: ${maker}`);
         }
 
         const {
             ciphertext,
             dataToEncryptHash
         } = await litLib.encrypt(JSON.stringify({
-            sourceToken: sourceToken,
-            destToken: destToken,
             sourceTokenAmount: sourceTokenAmount,
-            destTokenAmount: destTokenAmount,
-            maker: maker
+            destTokenAmount: destTokenAmount
         }), getOrderEncryptionAcc(maker));
 
         return {
