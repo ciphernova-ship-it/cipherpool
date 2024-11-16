@@ -74,7 +74,6 @@ interface IERC20 {
     function transferFrom(address from, address to, uint256 value) external returns (bool);
 }
 
-
 /**
  * @dev Provides information about the current execution context, including the
  * sender of the transaction and its data. While these are generally available
@@ -167,43 +166,35 @@ contract Ownable is Context {
 
 
 contract CipherpoolVault is Ownable {
-     
-   mapping(address => mapping(address =>  uint256)) public userBalances;
+    mapping(address => mapping(address => uint256)) public userBalances;
 
+    function deposit(address _userAddress, address _tokenAddress, uint256 _amount) external {
+        require(_userAddress != address(0) || _tokenAddress != address(0), "ERR_INVALID_ADDRESS");
+        require(_amount > 0, "ERR_INVALID_AMOUNT");
 
-
-   function deposit(address _userAddress, address _tokenAddress, uint256 _amount) external {
-        require(_userAddress != address(0) ||  _tokenAddress != address(0) , "ERR_INVALID_ADDRESS");
-        require(_amount > 0 , "ERR_INVALID_AMOUNT");
-
-        // Transfering tokens from User
-        IERC20(_tokenAddress).transferFrom(_userAddress , address(this) , _amount);
+        // Transferring tokens from User
+        IERC20(_tokenAddress).transferFrom(_userAddress, address(this), _amount);
         userBalances[_userAddress][_tokenAddress] += _amount;
-   }
+    }
 
 
-   function withdraw(address _userAddress, address _tokenAddress, uint256 _amount) external {
-        require(msg.sender == _userAddress, "ERR_ONLY_OWNER_CAN_WITHDRAW");
-        require(_userAddress != address(0) ||  _tokenAddress != address(0) , "ERR_INVALID_ADDRESS");
-        require(_amount > 0 , "ERR_INVALID_AMOUNT");
-        require(_amount > userBalances[_userAddress][_tokenAddress] , "ERR_INSUFFICIENT_AMOUNT_TO_WITHDRAW");
+    function withdraw(address _tokenAddress, uint256 _amount) external {
+        require(_amount > 0, "ERR_INVALID_AMOUNT");
+        require(_amount > userBalances[msg.sender][_tokenAddress], "ERR_INSUFFICIENT_AMOUNT_TO_WITHDRAW");
 
-         userBalances[_userAddress][_tokenAddress] -= _amount;
+        userBalances[msg.sender][_tokenAddress] -= _amount;
 
-        //  transfering the tokens to the user
-        IERC20(_tokenAddress).transfer(_userAddress, _amount);
-   }
+        //  Transferring the tokens to the user
+        IERC20(_tokenAddress).transfer(msg.sender, _amount);
+    }
 
-   function settleOrder(address _makerTokenAddress, address _makerTokenUserAddress, uint256 _makerTokenAmount,  address _takerTokenAddress, address _takerTokenUserAddress, uint256 _takerTokenAmount) external  onlyOwner {
-          userBalances[_makerTokenAddress][_makerTokenUserAddress] -= _makerTokenAmount;
-           userBalances[_takerTokenAddress][_takerTokenUserAddress] += _takerTokenAmount;
+    function settleOrder(address _makerTokenAddress, address _makerTokenUserAddress, uint256 _makerTokenAmount, address _takerTokenAddress, address _takerTokenUserAddress, uint256 _takerTokenAmount) external onlyOwner {
+        userBalances[_makerTokenUserAddress][_makerTokenAddress] -= _makerTokenAmount;
+        userBalances[_takerTokenUserAddress][_takerTokenAddress] -= _takerTokenAmount;
 
-           // Transferring the respective tokens to the user
-           IERC20(_makerTokenAddress).transfer(_makerTokenUserAddress , _makerTokenAmount);
-           IERC20(_takerTokenAddress).transfer(_takerTokenUserAddress , _takerTokenAmount);
- }
-
-
-  
+        // Transferring the respective tokens to the user
+        IERC20(_makerTokenAddress).transfer(_makerTokenUserAddress, _makerTokenAmount);
+        IERC20(_takerTokenAddress).transfer(_takerTokenUserAddress, _takerTokenAmount);
+    }
 }
 
