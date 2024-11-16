@@ -6,13 +6,14 @@ import { CONTRACT_ADDRESS, TOAST_CONFIG, BASE_SCANNER_URL } from "./utils/consta
 import ABI from "./../ABI/vaultABI.json"
 import { toast } from "react-toastify"
 import truncateEthAddress from "truncate-eth-address"
-import { useWatchContractEvent } from "wagmi"
+import { useAccount, useWatchContractEvent } from "wagmi"
 import { useState } from "react";
 
 
 function App() {
 
   const [txHash, setTxHash] = useState(null)
+  const {address} = useAccount()
 
   useWatchContractEvent({
     address: CONTRACT_ADDRESS,
@@ -20,7 +21,10 @@ function App() {
     eventName: 'OrderSettled',
     onLogs(logs) {
       setTxHash(logs[0]?.transactionHash);
-      toast.success("Order executed...", TOAST_CONFIG)
+      if(logs[0]?.args?._user1?.toLowerCase() === address?.toLowerCase() || logs[0]?.args?._user2?.toLowerCase() === address?.toLowerCase()){
+        toast.success("Order executed...", TOAST_CONFIG)
+       }
+
     },
   })
 
