@@ -12,8 +12,8 @@ import {
 import { WagmiProvider } from 'wagmi';
 import {
 
-  arbitrum,
-  arbitrumSepolia,
+
+  bscTestnet,
 } from 'wagmi/chains';
 import {
   QueryClientProvider,
@@ -24,7 +24,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const config = getDefaultConfig({
   appName: 'Cipherpool',
   projectId: 'b534a3a93b66b9fccda2a2f70d875708',
-  chains: [arbitrum , arbitrumSepolia],
+  chains: [ bscTestnet],
   ssr: true, // If your dApp uses server side rendering (SSR)
 });
 

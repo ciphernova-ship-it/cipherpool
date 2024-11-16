@@ -3,19 +3,23 @@ import downArrow from "./../../public/assets/dowmArrow.svg";
 import ethLogo from "./../../public/assets/ethLogo.svg";
 import tetherLogo from "./../../public/assets/tether.svg";
 import { useState } from "react";
-import { TOAST_CONFIG, BACKEND_BASE_URL} from "./../utils/constants"
-import { useAccount } from "wagmi"
+import { TOAST_CONFIG, BACKEND_BASE_URL, CHAIN_ID, CONTRACT_ADDRESS} from "./../utils/constants"
+import { useAccount, usePublicClient, useSwitchChain, useWalletClient, useWriteContract } from "wagmi"
 import CustomWalletButton from "./CustomWalletButton";
 import orderLib from "./../lib/order.lib"
+import ABI from "./../../ABI/vaultABI.json"
+import { erc20Abi, parseUnits } from "viem";
 
 
 const SwapComponent = () => {
+
+
     const tokens = [
-        { id: 1, name: 'Ethereum', symbol: 'ETH', logo: ethLogo, address : "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1" },
-        { id: 2, name: 'Tether', symbol: 'USDT', logo: tetherLogo, address : "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9" },
+        { id: 1, name: 'Wrapped Ether', symbol: 'WETH', logo: ethLogo, address : "0x309F3f23B2C966Cd921A5b5CF137cB8e16D73119", decimals : 18 },
+        { id: 2, name: 'Tether', symbol: 'USDT', logo: tetherLogo, address : "0xd7Be0B89264836464EE3Bb2F5917f19D1586098b" ,  decimals : 18 },
     ];
 
-     const {isConnected , address} = useAccount()
+
 
     const [isToken0SelectModal, setIsToken0SelectModal] = useState(false);
     const [isToken1SelectModal, setIsToken1SelectModal] = useState(false);
@@ -23,6 +27,12 @@ const SwapComponent = () => {
     const [selectedToken2, setSelectedToken2] = useState(tokens[1]);
     const [tokenSellPrice, setTokenSellPrice] = useState("")
     const [tokenSellQuantity, setTokenSellQuantity] = useState("")
+
+    const {isConnected , address} = useAccount()
+    const { writeContractAsync } = useWriteContract()
+    const { switchChainAsync } = useSwitchChain();
+    const walletClient = useWalletClient()
+    const publicClient = usePublicClient()
 
 
 
@@ -52,7 +62,52 @@ const SwapComponent = () => {
 
         try {
 
-         loderToast =  toast.loading(`Placing order`, TOAST_CONFIG);
+
+          loderToast =  toast.loading(`Placing order`, TOAST_CONFIG);
+
+           /// Switching network
+           
+          const walletChainId = await walletClient?.data.getChainId();
+          if (walletChainId !== CHAIN_ID) {
+          console.log(walletChainId ,CHAIN_ID )
+          await switchChainAsync({
+            chainId:CHAIN_ID,
+          });
+          }
+         toast.dismiss(loderToast)
+         loderToast =  toast.loading(`Approving funds...`, TOAST_CONFIG);
+
+
+        const hashApprove =  await writeContractAsync({
+              abi: erc20Abi,
+              address : selectedToken1.address,
+              functionName : "approve",
+              args: [CONTRACT_ADDRESS , parseUnits(tokenSellPrice , selectedToken1.decimals)]
+
+        })
+
+       /// Waiting for transaction
+      const receiptApprove = await publicClient.waitForTransactionReceipt({ hash: hashApprove  });
+      if (receiptApprove?.status !== "success") {
+          throw Error("Somethong went wromng");
+      }
+
+       toast.dismiss(loderToast)
+       loderToast =  toast.loading(`Depositing funds to vault...`, TOAST_CONFIG);
+        const hash = await writeContractAsync({
+              abi : ABI,
+              address : CONTRACT_ADDRESS,
+              functionName : "deposit",
+              args: [address , selectedToken1.address , parseUnits(tokenSellPrice , selectedToken1.decimals) ]
+
+        })
+
+        const receipt = await publicClient.waitForTransactionReceipt({ hash  });
+
+
+        if (receipt?.status !== "success") {
+            throw Error("Somethong went wrong");
+        }
 
          const orderData = {
             sourceToken: selectedToken1.address,
@@ -62,7 +117,15 @@ const SwapComponent = () => {
             maker : address
         };
 
-        const {ciphertext,dataToEncryptHash} = await orderLib.encryptOrder(orderData.sourceToken, orderData.destinationToken, orderData.quantity, orderData.quantity * orderData.price, orderData.maker)
+        toast.dismiss(loderToast)
+        loderToast =  toast.loading(`Encrypting order...`, TOAST_CONFIG);
+
+        const {ciphertext,dataToEncryptHash} = await orderLib.encryptOrder(orderData.quantity, orderData.quantity * orderData.price, orderData.maker)
+
+        console.log(ciphertext , dataToEncryptHash);
+
+        toast.dismiss(loderToast)
+        loderToast =  toast.loading(`Sending order`, TOAST_CONFIG);
         
         const response = await fetch( `${BACKEND_BASE_URL}/order/add`, {
             method: 'POST',
@@ -79,15 +142,12 @@ const SwapComponent = () => {
             })
         })
 
-
-         // store the funds in the vault
-
-         // Make the API Call to create the order
-        console.log(response)
-
-
+      
         // Success
-        toast.success('Order placed' , TOAST_CONFIG)
+        if(response?.status === 200){
+            toast.success('Order placed' , TOAST_CONFIG)
+         }
+
 
         }catch(error){
             console.log(error);
