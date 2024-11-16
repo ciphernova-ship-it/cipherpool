@@ -7,5 +7,5 @@ export const TOAST_CONFIG = {
  position: "top-center"
 }
 
-export const CONTRACT_ADDRESS = "0xc7CC2a7BeBd529414b1A055e73Ec0fBf8E46f405"
-export const CHAIN_ID = 97
+export const CONTRACT_ADDRESS = "0x32cBDB4f9ee29508eCffaa64643904A965A5DC83"
+export const CHAIN_ID = 11155111

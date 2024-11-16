@@ -11,9 +11,7 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
 import {
-
-
-  bscTestnet,
+  sepolia,
 } from 'wagmi/chains';
 import {
   QueryClientProvider,
@@ -24,7 +22,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const config = getDefaultConfig({
   appName: 'Cipherpool',
   projectId: 'b534a3a93b66b9fccda2a2f70d875708',
-  chains: [ bscTestnet],
+  chains: [ sepolia],
   ssr: true, // If your dApp uses server side rendering (SSR)
 });
 

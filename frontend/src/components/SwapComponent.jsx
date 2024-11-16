@@ -15,11 +15,9 @@ const SwapComponent = () => {
 
 
     const tokens = [
-        { id: 1, name: 'Wrapped Ether', symbol: 'WETH', logo: ethLogo, address: "0x309F3f23B2C966Cd921A5b5CF137cB8e16D73119", decimals: 18 },
-        { id: 2, name: 'Tether', symbol: 'USDT', logo: tetherLogo, address: "0xd7Be0B89264836464EE3Bb2F5917f19D1586098b", decimals: 18 },
+        { id: 1, name: 'Wrapped Ether', symbol: 'WETH', logo: ethLogo, address: "0x45860C6c761B962B34B60840ce154B7485801Ed3", decimals: 18 },
+        { id: 2, name: 'Tether', symbol: 'USDT', logo: tetherLogo, address: "0x3E32219eC2e3BFAD65033c47E6ae1b1D00B4497b", decimals: 18 },
     ];
-
-
 
     const [isToken0SelectModal, setIsToken0SelectModal] = useState(false);
     const [isToken1SelectModal, setIsToken1SelectModal] = useState(false);
