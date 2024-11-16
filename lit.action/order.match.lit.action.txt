@@ -1,5 +1,40 @@
 (async () => {
     try{
+        const generateCallData = (makerTokenAddress,makerTokenUserAddress,makerTokenAmount,takerTokenAddress,takerTokenUserAddress,takerTokenAmount) => {
+            const settleOrderInterface = new ethers.utils.Interface([
+                "function settleOrder(address,address,uint256,address,address,uint256)",
+            ]);
+            return settleOrderInterface.encodeFunctionData("settleOrder", [
+                makerTokenAddress,
+                makerTokenUserAddress,
+                makerTokenAmount,
+                takerTokenAddress,
+                takerTokenUserAddress,
+                takerTokenAmount
+            ]);
+        }
+
+         const generateUnsignedSettlingTransaction = (chainId,makerTokenAddress, makerTokenUserAddress,makerTokenAmount,takerTokenAddress,takerTokenUserAddress,takerTokenAmount) => {
+            return {
+                to: "0xc7CC2a7BeBd529414b1A055e73Ec0fBf8E46f405",
+                value:0,
+                nonce,
+                gasLimit: "60000",
+                from:  pkpAddress,
+                data: generateCallData(makerTokenAddress,makerTokenUserAddress,makerTokenAmount,takerTokenAddress,takerTokenUserAddress,takerTokenAmount),
+                type: 2,
+                chainId,
+            };
+        }
+
+        const hashTransaction = (tx) => {
+             return ethers.utils.arrayify(
+                   ethers.utils.keccak256(
+                        ethers.utils.arrayify(ethers.utils.serializeTransaction(tx)),
+                   ),
+             );
+        };
+
         let order1 = await Lit.Actions.decryptAndCombine({
             accessControlConditions:order1AccessControlConditions,
             ciphertext:order1Ciphertext,
@@ -18,9 +53,42 @@
         });
         order2=JSON.parse(order2);
 
-console.log(order1.sourceTokenAmount,order2.destTokenAmount,order1.destTokenAmount,order2.sourceTokenAmount);
+        console.log(order1.sourceTokenAmount,order2.destTokenAmount,order1.destTokenAmount,order2.sourceTokenAmount);
         if(order1.sourceTokenAmount === order2.destTokenAmount && order1.destTokenAmount === order2.sourceTokenAmount){
-            Lit.Actions.setResponse({ response: "MATCHED" });
+            console.log(makerSourceTokenAddress)
+            const orderSettlingTransaction = generateUnsignedSettlingTransaction(
+                chainId,
+                makerSourceTokenAddress,
+                makerSourceTokenUserAddress,
+                order1.sourceTokenAmount,
+                takerSourceTokenAddress,
+                takerSourceTokenUserAddress,
+                order2.sourceTokenAmount
+            );
+            console.log(orderSettlingTransaction);
+
+             const signature = await LitActions.signAndCombineEcdsa({
+                    toSign: hashTransaction(orderSettlingTransaction),
+                    publicKey: pkpPublicKey,
+                    sigName: "settleOrderSignature",
+            });
+
+            const jsonSignature = JSON.parse(signature);
+            jsonSignature.r = "0x" + jsonSignature.r.substring(2);
+            jsonSignature.s = "0x" + jsonSignature.s;
+            const hexSignature = ethers.utils.joinSignature(jsonSignature);
+
+            const signedTx = ethers.utils.serializeTransaction(
+                orderSettlingTransaction,
+                hexSignature
+            );
+
+            const recoveredAddress = ethers.utils.recoverAddress(hashTransaction(orderSettlingTransaction), hexSignature);
+            console.log("Recovered Address:", recoveredAddress);
+
+            Lit.Actions.setResponse({
+                    response: JSON.stringify({ signedTx }),
+            });
             return;
         }
 

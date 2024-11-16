@@ -12,6 +12,7 @@
   "dependencies": {
     "@lit-protocol/auth-helpers": "^6.11.1",
     "@lit-protocol/constants": "^6.11.1",
+    "@lit-protocol/contracts-sdk": "^6.11.2",
     "@lit-protocol/lit-node-client": "^6.11.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
