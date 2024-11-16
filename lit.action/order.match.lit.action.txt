@@ -16,13 +16,14 @@
 
          const generateUnsignedSettlingTransaction = (chainId,makerTokenAddress, makerTokenUserAddress,makerTokenAmount,takerTokenAddress,takerTokenUserAddress,takerTokenAmount) => {
             return {
-                to: "0xc7CC2a7BeBd529414b1A055e73Ec0fBf8E46f405",
+                to: "0x32cBDB4f9ee29508eCffaa64643904A965A5DC83",
                 value:0,
                 nonce,
                 gasLimit: "60000",
+                gasPrice: gasPrice,
                 from:  pkpAddress,
                 data: generateCallData(makerTokenAddress,makerTokenUserAddress,makerTokenAmount,takerTokenAddress,takerTokenUserAddress,takerTokenAmount),
-                type: 2,
+                type: 0,
                 chainId,
             };
         }

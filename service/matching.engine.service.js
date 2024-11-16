@@ -64,7 +64,7 @@ const orderModel = require("../model/order.model");
             }
 
             for (const pairOrder of pairOrders) {
-                console.log(await litLib.executeLitAction(litConfig.orderMatchingLitActionCid, sessionSigs, {
+                const data = await litLib.executeLitAction(litConfig.orderMatchingLitActionCid, sessionSigs, {
                     chainId: litConfig.chainId,
                     order1AccessControlConditions: litLib.getOrderEncryptionAcc(pairOrder.fromOrder.maker),
                     order1Ciphertext: pairOrder.fromOrder.ciphertext,
@@ -80,20 +80,14 @@ const orderModel = require("../model/order.model");
                     takerSourceTokenUserAddress: pairOrder.toOrder.maker,
                     gasPrice: (await chainWallet.getGasPrice()).toHexString(),
                     nonce: await chainProvider.getTransactionCount(pkp.ethAddress),
-                }));
+                });
+
+                const txReceipt=await chainProvider.sendTransaction(JSON.parse(data.response).signedTx)
+                console.log(txReceipt)
             }
-            // matchingChecks = await Promise.all(matchingCalls);
-            //
-            // pairOrders.forEach((pairOrder, index) => {
-            //     const matchingCheck = matchingChecks[index];
-            //     if (matchingCheck.response === "MATCHED") {
-            //         loggerLib.logInfo("Match found!");
-            //         loggerLib.logInfo(`From order: ${JSON.stringify(pairOrder.fromOrder)}`);
-            //         loggerLib.logInfo(`To order: ${JSON.stringify(pairOrder.toOrder)}`);
-            //     }
-            // });
 
             await helperLib.sleep(1000);
+            process.exit(1);
         }
     } catch (error) {
         loggerLib.logError(error);
