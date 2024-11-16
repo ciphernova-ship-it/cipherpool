@@ -42,6 +42,30 @@ async function addOrder(req, res) {
     }
 }
 
+async function removeOrder(req, res) {
+    try {
+        const {id} = req.body;
+        if (_.isEmpty(id)) {
+            return res.status(400).json({
+                message: `Missing required fields! maker: ${id},`
+            });
+        }
+
+        await mongoLib.deleteOne(orderModel, { _id: id });
+
+        return res.status(200).json({
+            message: 'Order Deleted successfully',
+        });
+    } catch (error) {
+        loggerLib.logError(error);
+        return res.status(500).json({
+            message: "Some error occurred!",
+            error: util.inspect(error)
+        })
+    }
+}
+
 module.exports = {
-    addOrder: addOrder
+    addOrder: addOrder,
+    removeOrder: removeOrder
 }

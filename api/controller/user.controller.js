@@ -14,7 +14,7 @@ async function getOrders(req, res) {
         }
 
         //TODO: add pagination in future
-        const orders = await mongoLib.findWithSelect(orderModel, {maker: userAddress},{_id: 0, __v: 0});
+        const orders = await mongoLib.findWithSelect(orderModel, {maker: userAddress},{ __v: 0});
         return res.status(200).json({orders: orders});
     } catch (error) {
         loggerLib.logError(error);

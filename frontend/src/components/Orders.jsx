@@ -124,7 +124,25 @@ const Orders = () => {
          }
 
 
-         toast.success("Funds withdrawl from vault", TOAST_CONFIG);
+         const response = await fetch(`${BACKEND_BASE_URL}/order/remove`, {
+          method: 'DELETE',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              id : order._id
+
+          })
+         })
+
+
+      // Success
+      if (response?.status === 200) {
+        await fetchEncrypterOrder();
+        toast.success("Funds withdrawl from vault", TOAST_CONFIG);
+      }
+
+
 
 
 
@@ -137,6 +155,8 @@ const Orders = () => {
 
         console.log(order)
   }
+
+  console.log(encryptedOrder)
 
 
   if(encryptedOrder.length === 0 ){
@@ -167,7 +187,7 @@ const Orders = () => {
                 <th className="px-2 py-4 border-b text-center">Destination Token</th>
                 <th className="px-2 py-4 border-b text-center">Source Token Amount</th>
                 <th className="px-2 py-4 border-b text-center">Source Token Amount</th>
-                <th className="px-2 py-4 border-b text-center">Canel Order</th>
+                <th className="px-2 py-4 border-b text-center">Cancel Order</th>
               </tr>
             </thead>
             <tbody>
