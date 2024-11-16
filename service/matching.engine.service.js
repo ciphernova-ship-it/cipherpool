@@ -82,6 +82,7 @@ const orderModel = require("../model/order.model");
                     nonce: await chainProvider.getTransactionCount(pkp.ethAddress),
                 });
 
+                console.log(data);
                 const txReceipt=await chainProvider.sendTransaction(JSON.parse(data.response).signedTx)
                 console.log(txReceipt)
             }
