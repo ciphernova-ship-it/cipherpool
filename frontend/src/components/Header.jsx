@@ -13,22 +13,22 @@ const Header = () => {
 
     const { isConnected } = useAccount()
 
-    const connectLibClient = async ()=>{
-        try{
+    const connectLibClient = async () => {
+        try {
 
-         await litLib.connect();
+            await litLib.connect();
 
-        }catch(error){
+        } catch (error) {
             console.log(error);
         }
     }
 
-    useEffect(()=> {
+    useEffect(() => {
 
-     if(isConnected){ connectLibClient()}
-           
+        if (isConnected) { connectLibClient() }
+
     }, [isConnected])
-    
+
 
 
 
