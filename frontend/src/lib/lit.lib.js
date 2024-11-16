@@ -82,7 +82,7 @@ async function generateSessionSigs(signer) {
                     uri,
                     expiration,
                     resources: resourceAbilityRequests,
-                    walletAddress: signer.data.accounts.address,
+                    walletAddress: signer._address,
                     nonce: await litNodeClient.getLatestBlockhash(),
                     litNodeClient,
                 });

@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { BACKEND_BASE_URL, TOAST_CONFIG } from "../utils/constants";
-import { useAccount } from "wagmi";
+import { BACKEND_BASE_URL, CHAIN_ID, TOAST_CONFIG, CONTRACT_ADDRESS } from "../utils/constants";
+import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import truncateEthAddress from 'truncate-eth-address'
 import litLib from "./../lib/lit.lib"
-// import {useEthersSigner} from "./../lib/helper.lib"
+import orderLib from "./../lib/order.lib"
+import { useEthersSigner } from "./../lib/helper.lib"
+import ABI from "./../../ABI/vaultABI.json"
+import { parseUnits } from "viem";
+
 const Orders = () => {
 
 
   const { isConnected, address } = useAccount()
   const [encryptedOrder, setEncryptedOder] = useState([]);
-  // const signer = useEthersSigner(97);
-  // console.log(signer  )
-
-
+  const signer = useEthersSigner({ chainId: CHAIN_ID });
+  const {writeContractAsync} = useWriteContract()
+  const publicClient = usePublicClient();
 
   const fetchEncrypterOrder = async () => {
 
@@ -59,20 +62,90 @@ const Orders = () => {
   }
 
   const handleOrderDecrypt = async () => {
+
+    if(encryptedOrder?.[0].sourceTokenAmount){
+      toast.error("Orders Already Encrypted", TOAST_CONFIG);
+      return
+    }
+
+    let loader;
     try {
 
+     
+      loader = toast.loading("Decrypting your oders...", TOAST_CONFIG);
 
-      const res = await litLib.generateSessionSigs(signer);
-      console.log(res);
-
-    } catch (error) {
+      if(encryptedOrder?.length == 0){
+         toast.error("No orders to decrypt", TOAST_CONFIG);
+         return;
+      }
+      const sessionsKey = await litLib.generateSessionSigs(signer);
+      const acc =  orderLib.getOrderEncryptionAcc(address);
+      const updatedOrders = await Promise.all(
+        encryptedOrder.map(async (order) => {
+            const decryptedDataString = await litLib.decrypt(order.ciphertext, order.dataToEncryptHash, acc, sessionsKey );
+            const decryptedData = JSON.parse(decryptedDataString);
+            return {
+                ...order,
+                ...decryptedData,
+            };
+        }))
+      setEncryptedOder(updatedOrders)
+   } catch (error) {
       toast.error("Something went wrong", TOAST_CONFIG)
       console.log(error)
+    }finally{
+      toast.dismiss(loader)
     }
   }
 
+  const withdrawFundsFromVault = async (index) => {
+        const order = encryptedOrder[index]
+        if(!order){
+          toast.error("Something went wrong" , TOAST_CONFIG);
+          return;
+        }
 
-  return (
+        const loader = toast.loading("Withdrawing funds from vault..." , TOAST_CONFIG);
+        try{
+
+         const hash = await writeContractAsync({
+            abi: ABI,
+            address: CONTRACT_ADDRESS,
+            functionName: "withdraw",
+            args: [order.sourceToken , parseUnits(order.sourceTokenAmount.toString(), 18)]
+
+         })
+
+         const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+
+         if (receipt?.status !== "success") {
+             throw Error("Somethong went wrong");
+         }
+
+
+         toast.success("Funds withdrawl from vault", TOAST_CONFIG);
+
+
+
+        }catch(error){
+          toast.error("Something went wrong" , TOAST_CONFIG);
+          console.log(error)
+        }finally{
+          toast.dismiss(loader);
+        }
+
+        console.log(order)
+  }
+
+
+  if(encryptedOrder.length === 0 ){
+      return <div className="flex justify-center items-center mt-10 font-bold text-2xl">
+        No Order Placed yet
+      </div>
+  }
+
+ return (
     <div className="flex justify-center items-center m-4 md:m-10">
       <div className="flex flex-col gap-4 bg-white rounded-3xl p-4 w-full max-w-[680px] shadow-xl">
         <div className="flex justify-between items-center p-2">
@@ -82,7 +155,43 @@ const Orders = () => {
           >Decrypt Orders</div>
         </div>
 
-        <div className="overflow-x-auto">
+
+        {
+          encryptedOrder.length > 0 && encryptedOrder?.[0].destTokenAmount ? 
+
+          <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-black text-white text-xs md:text-lg md:py-2">
+                <th className="px-2 py-4 border-b text-center">Source Token</th>
+                <th className="px-2 py-4 border-b text-center">Destination Token</th>
+                <th className="px-2 py-4 border-b text-center">Source Token Amount</th>
+                <th className="px-2 py-4 border-b text-center">Source Token Amount</th>
+                <th className="px-2 py-4 border-b text-center">Canel Order</th>
+              </tr>
+            </thead>
+            <tbody>
+              {encryptedOrder?.map((order, index) => (
+                <tr key={index} className=" text-xs md:py-2 md:text-base">
+                  <td className="px-2 py-2 border-b text-center whitespace-nowrap">{truncateEthAddress(order.sourceToken)}</td>
+                  <td className="px-2 py-2 border-b text-center">{truncateEthAddress(order.destToken)}</td>
+                  <td className="px-2 py-2 border-b text-center">{(order.sourceTokenAmount)}</td>
+                  <td className="px-2 py-2 border-b text-center">{(order.destTokenAmount)}</td>
+                  <td className="px-2 py-2 border-b text-center"><div className="bg-black text-white font-bold p-2 rounded-full cursor-pointer transition-transform duration-300 ease-in-out hover:shadow-gray-800 hover:shadow-lg text-sm"  
+                   onClick={() => withdrawFundsFromVault(index)}
+                  >Withdraw</div></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+          
+          
+          
+          
+          :
+     
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-black text-white text-xs md:text-lg md:py-2">
@@ -95,7 +204,7 @@ const Orders = () => {
             <tbody>
               {encryptedOrder?.map((order, index) => (
                 <tr key={index} className="hover:bg-gray-100 text-xs md:py-2 md:text-base">
-                  <td className="px-2 py-2 border-b text-center whitespace-nowrap cursor-pointe">{truncateEthAddress(order.sourceToken)}</td>
+                  <td className="px-2 py-2 border-b text-center whitespace-nowrap">{truncateEthAddress(order.sourceToken)}</td>
                   <td className="px-2 py-2 border-b text-center">{truncateEthAddress(order.destToken)}</td>
                   <td className="px-2 py-2 border-b text-center">{truncateString(order.ciphertext)}</td>
                   <td className="px-2 py-2 border-b text-center">{truncateString(order.dataToEncryptHash)}</td>
@@ -104,6 +213,13 @@ const Orders = () => {
             </tbody>
           </table>
         </div>
+
+        }
+
+
+
+
+
       </div>
     </div>
   );

@@ -96,7 +96,7 @@ const SwapComponent = () => {
                 abi: ABI,
                 address: CONTRACT_ADDRESS,
                 functionName: "deposit",
-                args: [address, selectedToken1.address, parseUnits(tokenSellQuantity, selectedToken1.decimals)]
+                args: [ selectedToken1.address, parseUnits(tokenSellQuantity, selectedToken1.decimals)]
 
             })
 

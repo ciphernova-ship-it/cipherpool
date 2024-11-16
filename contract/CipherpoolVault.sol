@@ -168,7 +168,8 @@ contract Ownable is Context {
 contract CipherpoolVault is Ownable {
     mapping(address => mapping(address => uint256)) public userBalances;
 
-    function deposit(address _userAddress, address _tokenAddress, uint256 _amount) external {
+    function deposit( address _tokenAddress, uint256 _amount) external {
+        address _userAddress = msg.sender;
         require(_userAddress != address(0) || _tokenAddress != address(0), "ERR_INVALID_ADDRESS");
         require(_amount > 0, "ERR_INVALID_AMOUNT");
 
@@ -180,7 +181,7 @@ contract CipherpoolVault is Ownable {
 
     function withdraw(address _tokenAddress, uint256 _amount) external {
         require(_amount > 0, "ERR_INVALID_AMOUNT");
-        require(_amount > userBalances[msg.sender][_tokenAddress], "ERR_INSUFFICIENT_AMOUNT_TO_WITHDRAW");
+        require(_amount <= userBalances[msg.sender][_tokenAddress], "ERR_INSUFFICIENT_AMOUNT_TO_WITHDRAW");
 
         userBalances[msg.sender][_tokenAddress] -= _amount;
 
