@@ -24,6 +24,7 @@ const orderModel = require("../model/order.model");
 
             if (_.isEmpty(orders)) {
                 loggerLib.logInfo("No orders found!");
+                await helperLib.sleep(1000);
                 continue;
             }
 
@@ -41,8 +42,11 @@ const orderModel = require("../model/order.model");
 
             if (_.isEmpty(pairOrders)) {
                 loggerLib.logInfo("No pair orders found!");
+                await helperLib.sleep(1000);
                 continue;
             }
+
+            // console.log(pairOrders);
 
             matchingCalls = pairOrders.map((pairOrder) => litLib.executeLitAction(litConfig.orderMatchingLitActionCid, sessionSigs, {
                 order1AccessControlConditions: litLib.getOrderEncryptionAcc(pairOrder.fromOrder.maker),
@@ -53,6 +57,8 @@ const orderModel = require("../model/order.model");
                 order2DataToEncryptHash: pairOrder.toOrder.dataToEncryptHash,
             }));
             matchingChecks = await Promise.all(matchingCalls);
+            console.log(matchingChecks);
+            process.exit(1);
 
             pairOrders.forEach((pairOrder, index) => {
                 const matchingCheck = matchingChecks[index];
@@ -62,6 +68,8 @@ const orderModel = require("../model/order.model");
                     loggerLib.logInfo(`To order: ${JSON.stringify(pairOrder.toOrder)}`);
                 }
             });
+
+            await helperLib.sleep(1000);
         }
     } catch (error) {
         loggerLib.logError(error);

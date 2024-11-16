@@ -18,6 +18,7 @@
         });
         order2=JSON.parse(order2);
 
+console.log(order1.sourceTokenAmount,order2.destTokenAmount,order1.destTokenAmount,order2.sourceTokenAmount);
         if(order1.sourceTokenAmount === order2.destTokenAmount && order1.destTokenAmount === order2.sourceTokenAmount){
             Lit.Actions.setResponse({ response: "MATCHED" });
             return;
