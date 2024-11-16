@@ -8,6 +8,7 @@ const mongoLib = require("../lib/mongo.lib");
 const loggerLib = require('../lib/logger.lib');
 
 const apiConfig = require("../config/api.config.json");
+const userRoutes = require("./route/user.route");
 const orderRoutes = require("./route/order.route");
 
 (async () => {
@@ -21,6 +22,7 @@ const orderRoutes = require("./route/order.route");
         app.get("/", (req, res) => {
             return res.sendFile(path.resolve(__dirname, "./view/index.html"));
         });
+        app.use("/user", userRoutes);
         app.use("/order", orderRoutes);
 
         app.listen(apiConfig.port, () => {

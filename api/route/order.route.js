@@ -5,5 +5,4 @@ const router = express.Router()
 
 router.post('/add', orderController.addOrder);
 
-
 module.exports = router
