@@ -155,10 +155,6 @@ const Orders = () => {
 
         console.log(order)
   }
-
-  console.log(encryptedOrder)
-
-
   if(encryptedOrder.length === 0 ){
       return <div className="flex justify-center items-center mt-10 font-bold text-2xl">
         No Order Placed yet

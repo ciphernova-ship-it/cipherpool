@@ -168,6 +168,8 @@ contract Ownable is Context {
 contract CipherpoolVault is Ownable {
     mapping(address => mapping(address => uint256)) public userBalances;
 
+    event OrderSettled(address indexed _user1, address indexed _user2);
+
     function deposit( address _tokenAddress, uint256 _amount) external {
         address _userAddress = msg.sender;
         require(_userAddress != address(0) || _tokenAddress != address(0), "ERR_INVALID_ADDRESS");
@@ -196,6 +198,8 @@ contract CipherpoolVault is Ownable {
         // Transferring the respective tokens to the user
         IERC20(_makerTokenAddress).transfer(_makerTokenUserAddress, _makerTokenAmount);
         IERC20(_takerTokenAddress).transfer(_takerTokenUserAddress, _takerTokenAmount);
+
+        emit OrderSettled(_makerTokenUserAddress, _takerTokenUserAddress);
     }
 }
 
