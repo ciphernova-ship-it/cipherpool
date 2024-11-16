@@ -172,28 +172,36 @@ contract CipherpoolVault is Ownable {
 
 
 
-   function deposit(address _userAddress, address _sourceToken, uint256 _amount) external {
-        require(_userAddress != address(0) ||  _sourceToken != address(0) , "ERR_INVALID_ADDRESS");
+   function deposit(address _userAddress, address _tokenAddress, uint256 _amount) external {
+        require(_userAddress != address(0) ||  _tokenAddress != address(0) , "ERR_INVALID_ADDRESS");
         require(_amount > 0 , "ERR_INVALID_AMOUNT");
-        userBalances[_userAddress][_sourceToken] += _amount;
+
+        // Transfering tokens from User
+        IERC20(_tokenAddress).transferFrom(_userAddress , address(this) , _amount);
+        userBalances[_userAddress][_tokenAddress] += _amount;
    }
 
 
-   function withdraw(address _userAddress, address _sourceToken, uint256 _amount) external {
+   function withdraw(address _userAddress, address _tokenAddress, uint256 _amount) external {
         require(msg.sender == _userAddress, "ERR_ONLY_OWNER_CAN_WITHDRAW");
-        require(_userAddress != address(0) ||  _sourceToken != address(0) , "ERR_INVALID_ADDRESS");
+        require(_userAddress != address(0) ||  _tokenAddress != address(0) , "ERR_INVALID_ADDRESS");
         require(_amount > 0 , "ERR_INVALID_AMOUNT");
-        require(_amount > userBalances[_userAddress][_sourceToken] , "ERR_INSUFFICIENT_AMOUNT_TO_WITHDRAW");
+        require(_amount > userBalances[_userAddress][_tokenAddress] , "ERR_INSUFFICIENT_AMOUNT_TO_WITHDRAW");
 
-         userBalances[_userAddress][_sourceToken] -= _amount;
+         userBalances[_userAddress][_tokenAddress] -= _amount;
 
         //  transfering the tokens to the user
-        IERC20(_sourceToken).transfer(_userAddress, _amount);
+        IERC20(_tokenAddress).transfer(_userAddress, _amount);
    }
 
-   function manageUserFunds() external  onlyOwner {
-    
-   }
+   function settleOrder(address _makerTokenAddress, address _makerTokenUserAddress, uint256 _makerTokenAmount,  address _takerTokenAddress, address _takerTokenUserAddress, uint256 _takerTokenAmount) external  onlyOwner {
+          userBalances[_makerTokenAddress][_makerTokenUserAddress] -= _makerTokenAmount;
+           userBalances[_takerTokenAddress][_takerTokenUserAddress] += _takerTokenAmount;
+
+           // Transferring the respective tokens to the user
+           IERC20(_makerTokenAddress).transfer(_makerTokenUserAddress , _makerTokenAmount);
+           IERC20(_takerTokenAddress).transfer(_takerTokenUserAddress , _takerTokenAmount);
+ }
 
 
   
