@@ -4,13 +4,15 @@ import { BACKEND_BASE_URL, TOAST_CONFIG } from "../utils/constants";
 import { useAccount } from "wagmi";
 import truncateEthAddress from 'truncate-eth-address'
 import litLib from "./../lib/lit.lib"
-
-
+// import {useEthersSigner} from "./../lib/helper.lib"
 const Orders = () => {
 
 
   const { isConnected, address } = useAccount()
   const [encryptedOrder, setEncryptedOder] = useState([]);
+  // const signer = useEthersSigner(97);
+  // console.log(signer  )
+
 
 
   const fetchEncrypterOrder = async () => {
@@ -60,9 +62,8 @@ const Orders = () => {
     try {
 
 
-      // console.log(walletClient?.data)
-      // const res = await litLib.generateSessionSigs(walletClient?.data);
-      // console.log(res);
+      const res = await litLib.generateSessionSigs(signer);
+      console.log(res);
 
     } catch (error) {
       toast.error("Something went wrong", TOAST_CONFIG)

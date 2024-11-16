@@ -110,8 +110,8 @@ const SwapComponent = () => {
             const orderData = {
                 sourceToken: selectedToken1.address,
                 destinationToken: selectedToken2.address,
-                sourceTokenAmount: tokenSellQuantity,
-                destTokenAmount: Math.floor(tokenSellPrice * tokenSellQuantity),
+                sourceTokenAmount: parseInt(tokenSellQuantity),
+                destTokenAmount: parseInt(Math.floor(tokenSellPrice * tokenSellQuantity)),
                 maker: address
             };
 
