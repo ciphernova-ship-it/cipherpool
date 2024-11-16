@@ -1,13 +1,11 @@
-import { useAccount, useWatchContractEvent } from "wagmi"
+import { useAccount } from "wagmi"
 import Logo from "./../../public/assets/Logo.svg"
 import { Link } from "react-router-dom"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import CustomWalletButton from "./CustomWalletButton"
 import { useEffect } from "react"
 import litLib from "./../lib/lit.lib"
-import { CONTRACT_ADDRESS, TOAST_CONFIG } from "../utils/constants"
-import ABI from "./../../ABI/vaultABI.json"
-import { toast } from "react-toastify"
+
 
 
 
@@ -15,6 +13,7 @@ const Header = () => {
 
 
     const { isConnected } = useAccount()
+
 
     const connectLibClient = async () => {
         try {
@@ -32,15 +31,7 @@ const Header = () => {
 
     }, [isConnected])
 
-    useWatchContractEvent({
-        address: CONTRACT_ADDRESS,
-        abi : ABI,
-        eventName: 'OrderSettled',
-        onLogs(logs) {
-          console.log('New logs!', logs)
-          toast.success("Order executed..." , TOAST_CONFIG)
-        },
-    })
+
 
 
 
@@ -60,6 +51,7 @@ const Header = () => {
             </div>
 
         </div>
+
 
         {
             isConnected ?
