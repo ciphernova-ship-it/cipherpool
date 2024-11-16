@@ -1,0 +1,30 @@
+(async () => {
+    try{
+        let order1 = await Lit.Actions.decryptAndCombine({
+            accessControlConditions:order1AccessControlConditions,
+            ciphertext:order1Ciphertext,
+            dataToEncryptHash:order1DataToEncryptHash,
+            authSig: null,
+            chain: 'ethereum',
+        });
+        order1=JSON.parse(order1);
+
+        let order2= await Lit.Actions.decryptAndCombine({
+            accessControlConditions:order2AccessControlConditions,
+            ciphertext: order2Ciphertext,
+            dataToEncryptHash:order2DataToEncryptHash,
+            authSig: null,
+            chain: 'ethereum',
+        });
+        order2=JSON.parse(order2);
+
+        if(order1.sourceTokenAmount === order2.destTokenAmount && order1.destTokenAmount === order2.sourceTokenAmount){
+            Lit.Actions.setResponse({ response: "MATCHED" });
+            return;
+        }
+
+        Lit.Actions.setResponse({ response: "NOT_MATCHED" });
+    }catch(error){
+        console.log(error);
+    }
+})();
